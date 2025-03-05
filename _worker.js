@@ -961,9 +961,9 @@ async function HTML() {
     async function queryIpGeoInfo(ip) {
       try {
       // Use our own proxy interface
-      const response = await fetch(`./ip-info?ip=${ip}`);
+      const response = await fetch(\`./ip-info?ip=\${ip}\`);
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
+          throw new Error(\`HTTP error: ${response.status}\`);
         }
         return await response.json();
         } catch (error) {
@@ -984,21 +984,21 @@ async function HTML() {
         ipv4Container.innerHTML = '';
         
         if (ipv4Records.length === 0) {
-        document.getElementById('ipv4Summary').innerHTML = `<strong>No IPv4 records found</strong>`;
+        document.getElementById('ipv4Summary').innerHTML = \`<strong>No IPv4 records found</strong>\`;
         } else {
-        document.getElementById('ipv4Summary').innerHTML = `<strong>Found ${ipv4Records.length} IPv4 records</strong>`;
+        document.getElementById('ipv4Summary').innerHTML = \`<strong>Found ${ipv4Records.length} IPv4 records</strong>\`;
         
         ipv4Records.forEach(record => {
           if (record.type === 1) {  // 1 = A record
           const recordDiv = document.createElement('div');
           recordDiv.className = 'ip-record';
-          recordDiv.innerHTML = `
+          recordDiv.innerHTML = \`
             <div class="d-flex justify-content-between align-items-center">
             <span class="ip-address">${record.data}</span>
             <span class="geo-info geo-loading">Fetching geolocation...</span>
             <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
             </div>
-          `;
+          \`;
           ipv4Container.appendChild(recordDiv);
           
           // Add geolocation information
@@ -1036,21 +1036,21 @@ async function HTML() {
         ipv6Container.innerHTML = '';
         
         if (ipv6Records.length === 0) {
-        document.getElementById('ipv6Summary').innerHTML = `<strong>No IPv6 records found</strong>`;
+        document.getElementById('ipv6Summary').innerHTML = \`<strong>No IPv6 records found</strong>\`;
         } else {
-        document.getElementById('ipv6Summary').innerHTML = `<strong>Found ${ipv6Records.length} IPv6 records</strong>`;
+        document.getElementById('ipv6Summary').innerHTML = \`<strong>Found ${ipv6Records.length} IPv6 records</strong>\`;
         
         ipv6Records.forEach(record => {
           if (record.type === 28) {  // 28 = AAAA record
           const recordDiv = document.createElement('div');
           recordDiv.className = 'ip-record';
-          recordDiv.innerHTML = `
+          recordDiv.innerHTML = \`
             <div class="d-flex justify-content-between align-items-center">
             <span class="ip-address">${record.data}</span>
             <span class="geo-info geo-loading">Fetching geolocation...</span>
             <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
             </div>
-          `;
+          \`;
           ipv6Container.appendChild(recordDiv);
           
           // Add geolocation information
@@ -1088,20 +1088,20 @@ async function HTML() {
         nsContainer.innerHTML = '';
         
         if (nsRecords.length === 0) {
-        document.getElementById('nsSummary').innerHTML = `<strong>No NS records found</strong>`;
+        document.getElementById('nsSummary').innerHTML = \`<strong>No NS records found</strong>\`;
         } else {
-        document.getElementById('nsSummary').innerHTML = `<strong>Found ${nsRecords.length} NS records</strong>`;
+        document.getElementById('nsSummary').innerHTML = \`<strong>Found ${nsRecords.length} NS records</strong>\`;
         
         nsRecords.forEach(record => {
           if (record.type === 2) {  // 2 = NS record
           const recordDiv = document.createElement('div');
           recordDiv.className = 'ip-record';
-          recordDiv.innerHTML = `
+          recordDiv.innerHTML = \`
             <div class="d-flex justify-content-between align-items-center">
             <span class="ip-address">${record.data}</span>
             <span class="text-muted">TTL: ${formatTTL(record.TTL)}</span>
             </div>
-          `;
+          \`;
           nsContainer.appendChild(recordDiv);
           }
         });
@@ -1160,10 +1160,10 @@ async function HTML() {
         
         try {
         // Initiate query, parameters use GET request method, type=all means querying both A and AAAA
-        const response = await fetch(`?doh=${encodeURIComponent(doh)}&domain=${encodeURIComponent(domain)}&type=all`);
+        const response = await fetch(\`?doh=${encodeURIComponent(doh)}&domain=${encodeURIComponent(domain)}&type=all\`);
         
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
+          throw new Error(\`HTTP error: ${response.status}\`);
         }
         
         const json = await response.json();
