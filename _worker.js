@@ -3,7 +3,7 @@ export default {
         const url = new URL(request.url);
         const path = url.pathname;
         const hostname = url.hostname;
-        const dnsQuery = '/dns-query';
+        let dnsQuery = '/dns-query';
 
         // 处理 OPTIONS 预检请求
         if (request.method === 'OPTIONS') {
