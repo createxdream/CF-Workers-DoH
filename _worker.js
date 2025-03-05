@@ -429,7 +429,7 @@ async function DOHRequest(request) {
 async function HTML() {
     // 否则返回 HTML 页面
     const html = `<!DOCTYPE html>
-<html lang="en-US">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
@@ -740,7 +740,7 @@ async function HTML() {
     }
 
     .copy-link.copied:after {
-      content: '✓ Copied';
+      content: '✓ 已复制';
       opacity: 1;
     }
 
@@ -797,34 +797,34 @@ async function HTML() {
   <div class="container">
     <h1 class="text-center mb-4">DNS-over-HTTPS Resolver</h1>
     <div class="card">
-      <div class="card-header">DNS Query Settings</div>
+      <div class="card-header">DNS 查询设置</div>
       <div class="card-body">
         <form id="resolveForm">
           <div class="mb-3">
-            <label for="dohSelect" class="form-label">Select DoH Address:</label>
+            <label for="dohSelect" class="form-label">选择 DoH 地址:</label>
             <select id="dohSelect" class="form-select">
-              <option value="current" selected>Current Site (Auto)</option>
-              <option value="https://doh.pub/dns-query">doh.pub (Tencent)</option>
+              <option value="current" selected>当前站点 (自动)</option>
+              <option value="https://doh.pub/dns-query">doh.pub (腾讯)</option>
               <option value="https://cloudflare-dns.com/dns-query">Cloudflare DNS</option>
-              <option value="https://dns.google/resolve">Google</option>
+              <option value="https://dns.google/resolve">Google (谷歌)</option>
               <option value="https://dns.twnic.tw/dns-query">Quad101 (TWNIC)</option>
-              <option value="custom">Custom...</option>
+              <option value="custom">自定义...</option>
             </select>
           </div>
           <div id="customDohContainer" class="mb-3" style="display:none;">
-            <label for="customDoh" class="form-label">Enter Custom DoH Address:</label>
+            <label for="customDoh" class="form-label">输入自定义 DoH 地址:</label>
             <input type="text" id="customDoh" class="form-control" placeholder="https://example.com/dns-query">
           </div>
           <div class="mb-3">
-            <label for="domain" class="form-label">Domain to Resolve:</label>
+            <label for="domain" class="form-label">待解析域名:</label>
             <div class="input-group">
               <input type="text" id="domain" class="form-control" value="www.google.com"
-                placeholder="Enter domain, e.g. example.com">
-              <button type="button" class="btn btn-outline-secondary" id="clearBtn">Clear</button>
+                placeholder="输入域名，如 example.com">
+              <button type="button" class="btn btn-outline-secondary" id="clearBtn">清除</button>
             </div>
           </div>
           <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Resolve</button>
+            <button type="submit" class="btn btn-primary">解析</button>
           </div>
         </form>
       </div>
@@ -832,13 +832,13 @@ async function HTML() {
 
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Results</span>
-        <button class="btn btn-sm btn-outline-secondary" id="copyBtn" style="display: none;">Copy Results</button>
+        <span>解析结果</span>
+        <button class="btn btn-sm btn-outline-secondary" id="copyBtn" style="display: none;">复制结果</button>
       </div>
       <div class="card-body">
         <div id="loading" class="loading">
           <div class="loading-spinner"></div>
-          <p>Querying, please wait...</p>
+          <p>正在查询中，请稍候...</p>
         </div>
 
         <!-- 结果展示区，包含选项卡 -->
@@ -846,19 +846,19 @@ async function HTML() {
           <ul class="nav nav-tabs result-tabs" id="resultTabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="ipv4-tab" data-bs-toggle="tab" data-bs-target="#ipv4" type="button"
-                role="tab">IPv4 Address</button>
+                role="tab">IPv4 地址</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="ipv6-tab" data-bs-toggle="tab" data-bs-target="#ipv6" type="button"
-                role="tab">IPv6 Address</button>
+                role="tab">IPv6 地址</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="ns-tab" data-bs-toggle="tab" data-bs-target="#ns" type="button" role="tab">NS
-                Records</button>
+                记录</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw" type="button"
-                role="tab">Raw Data</button>
+                role="tab">原始数据</button>
             </li>
           </ul>
           <div class="tab-content" id="resultTabContent">
@@ -875,7 +875,7 @@ async function HTML() {
               <div id="nsRecords"></div>
             </div>
             <div class="tab-pane fade" id="raw" role="tabpanel" aria-labelledby="raw-tab">
-              <pre id="result">Waiting for query...</pre>
+              <pre id="result">等待查询...</pre>
             </div>
           </div>
         </div>
@@ -889,10 +889,10 @@ async function HTML() {
 
     <div class="beian-info">
       <p>
-      <!-- <strong>DNS-over-HTTPS：<span id="dohUrlDisplay" class="copy-link" title="Click to copy">https://<span
+        <!-- <strong>DNS-over-HTTPS：<span id="dohUrlDisplay" class="copy-link" title="点击复制">https://<span
               id="currentDomain">...</span>/dns-query</span></strong><br> -->
-              
-              DoH (DNS over HTTPS) Resolution Service Based on Cloudflare Workers</p>
+              基于 Cloudflare Workers 的 DoH (DNS over HTTPS)
+        解析服务</p>
     </div>
   </div>
 
@@ -941,34 +941,34 @@ async function HTML() {
       const resultText = document.getElementById('result').textContent;
       navigator.clipboard.writeText(resultText).then(function () {
         const originalText = this.textContent;
-        this.textContent = 'Copied';
+        this.textContent = '已复制';
         setTimeout(() => {
           this.textContent = originalText;
         }, 2000);
       }.bind(this)).catch(function (err) {
-        console.error('Unable to copy text: ', err);
+        console.error('无法复制文本: ', err);
       });
     });
 
     // 格式化 TTL
     function formatTTL(seconds) {
-      if (seconds < 60) return seconds + ' sec';
-      if (seconds < 3600) return Math.floor(seconds / 60) + ' min';
-      if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours';
-      return Math.floor(seconds / 86400) + ' days';
+      if (seconds < 60) return seconds + '秒';
+      if (seconds < 3600) return Math.floor(seconds / 60) + '分钟';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + '小时';
+      return Math.floor(seconds / 86400) + '天';
     }
 
     // 查询 IP 地理位置信息 - 使用我们自己的代理API而非直接访问HTTP地址
     async function queryIpGeoInfo(ip) {
       try {
         // 改为使用我们自己的代理接口
-        const response = await fetch(\`./ip-info?ip=${ip}\`);
+        const response = await fetch(\`./ip-info?ip=\${ip}\`);
             if (!response.ok) {
-              throw new Error(\`HTTP Error: ${response.status}\`);
+              throw new Error(\`HTTP 错误: \${response.status}\`);
             }
             return await response.json();
           } catch (error) {
-            console.error('IP geolocation query failed:', error);
+            console.error('IP 地理位置查询失败:', error);
             return null;
           }
         }
@@ -985,9 +985,9 @@ async function HTML() {
           ipv4Container.innerHTML = '';
           
           if (ipv4Records.length === 0) {
-            document.getElementById('ipv4Summary').innerHTML = \`<strong>No IPv4 Records Found</strong>\`;
+            document.getElementById('ipv4Summary').innerHTML = \`<strong>未找到 IPv4 记录</strong>\`;
           } else {
-            document.getElementById('ipv4Summary').innerHTML = \`<strong>Found ${ipv4Records.length} IPv4 Records</strong>\`;
+            document.getElementById('ipv4Summary').innerHTML = \`<strong>找到 \${ipv4Records.length} 条 IPv4 记录</strong>\`;
             
             ipv4Records.forEach(record => {
               if (record.type === 1) {  // 1 = A记录
@@ -995,9 +995,9 @@ async function HTML() {
                 recordDiv.className = 'ip-record';
                 recordDiv.innerHTML = \`
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">${record.data}</span>
-                    <span class="geo-info geo-loading">Getting location info...</span>
-                    <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
+                    <span class="ip-address">\${record.data}</span>
+                    <span class="geo-info geo-loading">正在获取位置信息...</span>
+                    <span class="text-muted ttl-info">TTL: \${formatTTL(record.TTL)}</span>
                   </div>
                 \`;
                 ipv4Container.appendChild(recordDiv);
@@ -1014,17 +1014,17 @@ async function HTML() {
                     // 添加国家信息
                     const countrySpan = document.createElement('span');
                     countrySpan.className = 'geo-country';
-                    countrySpan.textContent = geoData.country || 'Unknown Country';
+                    countrySpan.textContent = geoData.country || '未知国家';
                     geoInfoSpan.appendChild(countrySpan);
                     
                     // 添加 AS 信息
                     const asSpan = document.createElement('span');
                     asSpan.className = 'geo-as';
-                    asSpan.textContent = geoData.as || 'Unknown AS';
+                    asSpan.textContent = geoData.as || '未知 AS';
                     geoInfoSpan.appendChild(asSpan);
                   } else {
                     // 查询失败或无结果
-                    geoInfoSpan.textContent = 'Location info retrieval failed';
+                    geoInfoSpan.textContent = '位置信息获取失败';
                   }
                 });
               }
@@ -1037,9 +1037,9 @@ async function HTML() {
           ipv6Container.innerHTML = '';
           
           if (ipv6Records.length === 0) {
-            document.getElementById('ipv6Summary').innerHTML = \`<strong>No IPv6 Records Found</strong>\`;
+            document.getElementById('ipv6Summary').innerHTML = \`<strong>未找到 IPv6 记录</strong>\`;
           } else {
-            document.getElementById('ipv6Summary').innerHTML = \`<strong>Found ${ipv6Records.length} IPv6 Records</strong>\`;
+            document.getElementById('ipv6Summary').innerHTML = \`<strong>找到 \${ipv6Records.length} 条 IPv6 记录</strong>\`;
             
             ipv6Records.forEach(record => {
               if (record.type === 28) {  // 28 = AAAA记录
@@ -1047,9 +1047,9 @@ async function HTML() {
                 recordDiv.className = 'ip-record';
                 recordDiv.innerHTML = \`
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">${record.data}</span>
-                    <span class="geo-info geo-loading">Getting location info...</span>
-                    <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
+                    <span class="ip-address">\${record.data}</span>
+                    <span class="geo-info geo-loading">正在获取位置信息...</span>
+                    <span class="text-muted ttl-info">TTL: \${formatTTL(record.TTL)}</span>
                   </div>
                 \`;
                 ipv6Container.appendChild(recordDiv);
@@ -1066,17 +1066,17 @@ async function HTML() {
                     // 添加国家信息
                     const countrySpan = document.createElement('span');
                     countrySpan.className = 'geo-country';
-                    countrySpan.textContent = geoData.country || 'Unknown Country';
+                    countrySpan.textContent = geoData.country || '未知国家';
                     geoInfoSpan.appendChild(countrySpan);
                     
                     // 添加 AS 信息
                     const asSpan = document.createElement('span');
                     asSpan.className = 'geo-as';
-                    asSpan.textContent = geoData.as || 'Unknown AS';
+                    asSpan.textContent = geoData.as || '未知 AS';
                     geoInfoSpan.appendChild(asSpan);
                   } else {
                     // 查询失败或无结果
-                    geoInfoSpan.textContent = 'Location info retrieval failed';
+                    geoInfoSpan.textContent = '位置信息获取失败';
                   }
                 });
               }
@@ -1089,9 +1089,9 @@ async function HTML() {
           nsContainer.innerHTML = '';
           
           if (nsRecords.length === 0) {
-            document.getElementById('nsSummary').innerHTML = \`<strong>No NS Records Found</strong>\`;
+            document.getElementById('nsSummary').innerHTML = \`<strong>未找到 NS 记录</strong>\`;
           } else {
-            document.getElementById('nsSummary').innerHTML = \`<strong>Found ${nsRecords.length} Name Server Records</strong>\`;
+            document.getElementById('nsSummary').innerHTML = \`<strong>找到 \${nsRecords.length} 条名称服务器记录</strong>\`;
             
             nsRecords.forEach(record => {
               if (record.type === 2) {  // 2 = NS记录
@@ -1099,8 +1099,8 @@ async function HTML() {
                 recordDiv.className = 'ip-record';
                 recordDiv.innerHTML = \`
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">${record.data}</span>
-                    <span class="text-muted">TTL: ${formatTTL(record.TTL)}</span>
+                    <span class="ip-address">\${record.data}</span>
+                    <span class="text-muted">TTL: \${formatTTL(record.TTL)}</span>
                   </div>
                 \`;
                 nsContainer.appendChild(recordDiv);
@@ -1140,7 +1140,7 @@ async function HTML() {
           } else if(dohSelect === 'custom') {
             doh = document.getElementById('customDoh').value;
             if (!doh) {
-              alert('Please enter a custom DoH address');
+              alert('请输入自定义 DoH 地址');
               return;
             }
           } else {
@@ -1149,7 +1149,7 @@ async function HTML() {
           
           const domain = document.getElementById('domain').value;
           if (!domain) {
-            alert('Please enter a domain to resolve');
+            alert('请输入需要解析的域名');
             return;
           }
           
@@ -1161,10 +1161,10 @@ async function HTML() {
           
           try {
             // 发起查询，参数采用 GET 请求方式，type=all 表示同时查询 A 和 AAAA
-            const response = await fetch(\`?doh=${encodeURIComponent(doh)}&domain=${encodeURIComponent(domain)}&type=all\`);
+            const response = await fetch(\`?doh=\${encodeURIComponent(doh)}&domain=\${encodeURIComponent(domain)}&type=all\`);
             
             if (!response.ok) {
-              throw new Error(\`HTTP Error: ${response.status}\`);
+              throw new Error(\`HTTP 错误: \${response.status}\`);
             }
             
             const json = await response.json();
@@ -1176,7 +1176,7 @@ async function HTML() {
               displayRecords(json);
             }
           } catch (error) {
-            displayError('Query failed: ' + error.message);
+            displayError('查询失败: ' + error.message);
           } finally {
             // 隐藏加载状态
             document.getElementById('loading').style.display = 'none';
@@ -1224,15 +1224,15 @@ async function HTML() {
                 dohUrlDisplay.classList.remove('copied');
                 }, 2000);
             }).catch(function(err) {
-                console.error('Copy failed:', err);
+                console.error('复制失败:', err);
             });
             });
         }
         });
   </script>
 </body>
-</html>
-`;
+
+</html>`;
 
     return new Response(html, {
         headers: { "content-type": "text/html;charset=UTF-8" }
