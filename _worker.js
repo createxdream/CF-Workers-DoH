@@ -3,6 +3,7 @@ export default {
         const url = new URL(request.url);
         const path = url.pathname;
         const hostname = url.hostname;
+        const dnsQuery = '/dns-query';
 
         // 处理 OPTIONS 预检请求
         if (request.method === 'OPTIONS') {
@@ -16,8 +17,12 @@ export default {
             });
         }
 
+        if (env.PATH!=='') {
+            dnsQuery = env.PATH;
+        }
+
         // 如果请求路径是 /dns-query，则作为 DoH 服务器处理
-        if (path === '/dns-query') {
+        if (path === dnsQuery) {
             return await DOHRequest(request);
         }
 
