@@ -797,34 +797,34 @@ async function HTML() {
   <div class="container">
     <h1 class="text-center mb-4">DNS-over-HTTPS Resolver</h1>
     <div class="card">
-      <div class="card-header">DNS 查询设置</div>
+      <div class="card-header">DNS Query Settings</div>
       <div class="card-body">
         <form id="resolveForm">
           <div class="mb-3">
-            <label for="dohSelect" class="form-label">选择 DoH 地址:</label>
+            <label for="dohSelect" class="form-label">Select DoH Address:</label>
             <select id="dohSelect" class="form-select">
-              <option value="current" selected>当前站点 (自动)</option>
-              <option value="https://doh.pub/dns-query">doh.pub (腾讯)</option>
+              <option value="current" selected>Current Site (Auto)</option>
+              <option value="https://doh.pub/dns-query">doh.pub (Tencent)</option>
               <option value="https://cloudflare-dns.com/dns-query">Cloudflare DNS</option>
-              <option value="https://dns.google/resolve">Google (谷歌)</option>
+              <option value="https://dns.google/resolve">Google</option>
               <option value="https://dns.twnic.tw/dns-query">Quad101 (TWNIC)</option>
-              <option value="custom">自定义...</option>
+              <option value="custom">Custom...</option>
             </select>
           </div>
           <div id="customDohContainer" class="mb-3" style="display:none;">
-            <label for="customDoh" class="form-label">输入自定义 DoH 地址:</label>
+            <label for="customDoh" class="form-label">Enter Custom DoH Address:</label>
             <input type="text" id="customDoh" class="form-control" placeholder="https://example.com/dns-query">
           </div>
           <div class="mb-3">
-            <label for="domain" class="form-label">待解析域名:</label>
+            <label for="domain" class="form-label">Domain to Resolve:</label>
             <div class="input-group">
               <input type="text" id="domain" class="form-control" value="www.google.com"
-                placeholder="输入域名，如 example.com">
-              <button type="button" class="btn btn-outline-secondary" id="clearBtn">清除</button>
+                placeholder="Enter domain, e.g., example.com">
+              <button type="button" class="btn btn-outline-secondary" id="clearBtn">Clear</button>
             </div>
           </div>
           <div class="d-grid">
-            <button type="submit" class="btn btn-primary">解析</button>
+            <button type="submit" class="btn btn-primary">Resolve</button>
           </div>
         </form>
       </div>
@@ -832,33 +832,33 @@ async function HTML() {
 
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span>解析结果</span>
-        <button class="btn btn-sm btn-outline-secondary" id="copyBtn" style="display: none;">复制结果</button>
+        <span>Query Results</span>
+        <button class="btn btn-sm btn-outline-secondary" id="copyBtn" style="display: none;">Copy Results</button>
       </div>
       <div class="card-body">
         <div id="loading" class="loading">
           <div class="loading-spinner"></div>
-          <p>正在查询中，请稍候...</p>
+          <p>Querying, please wait...</p>
         </div>
 
-        <!-- 结果展示区，包含选项卡 -->
+        <!-- Results display area with tabs -->
         <div id="resultContainer" style="display: none;">
           <ul class="nav nav-tabs result-tabs" id="resultTabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="ipv4-tab" data-bs-toggle="tab" data-bs-target="#ipv4" type="button"
-                role="tab">IPv4 地址</button>
+                role="tab">IPv4 Addresses</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="ipv6-tab" data-bs-toggle="tab" data-bs-target="#ipv6" type="button"
-                role="tab">IPv6 地址</button>
+                role="tab">IPv6 Addresses</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="ns-tab" data-bs-toggle="tab" data-bs-target="#ns" type="button" role="tab">NS
-                记录</button>
+                Records</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw" type="button"
-                role="tab">原始数据</button>
+                role="tab">Raw Data</button>
             </li>
           </ul>
           <div class="tab-content" id="resultTabContent">
@@ -875,12 +875,12 @@ async function HTML() {
               <div id="nsRecords"></div>
             </div>
             <div class="tab-pane fade" id="raw" role="tabpanel" aria-labelledby="raw-tab">
-              <pre id="result">等待查询...</pre>
+              <pre id="result">Waiting for query...</pre>
             </div>
           </div>
         </div>
 
-        <!-- 错误信息区域 -->
+        <!-- Error message area -->
         <div id="errorContainer" style="display: none;">
           <pre id="errorMessage" class="error-message"></pre>
         </div>
@@ -892,346 +892,541 @@ async function HTML() {
       <!-- <strong>DNS-over-HTTPS：<span id="dohUrlDisplay" class="copy-link" title="点击复制">https://<span
               id="currentDomain">...</span>/dns-query</span></strong><br> -->
               
-              基于 Cloudflare Workers 的 DoH (DNS over HTTPS) 解析服务</p>
+              Based on Cloudflare Workers DoH (DNS over HTTPS) resolution service</p>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // 获取当前页面的 URL 和主机名
+    // Get the current page URL and hostname
     const currentUrl = window.location.href;
     const currentHost = window.location.host;
     const currentProtocol = window.location.protocol;
     const currentDohUrl = currentProtocol + '//' + currentHost + '/dns-query';
-
-    // 记录当前使用的 DoH 地址
+    // Record the currently used DoH address
     let activeDohUrl = currentDohUrl;
 
-    // 显示当前正在使用的 DoH 服务
+    // Display the currently used DoH service
     function updateActiveDohDisplay() {
       const dohSelect = document.getElementById('dohSelect');
       if (dohSelect.value === 'current') {
-        activeDohUrl = currentDohUrl;
+      activeDohUrl = currentDohUrl;
       }
     }
 
-    // 初始更新
+    // Initial update
     updateActiveDohDisplay();
 
-    // 当选择自定义时显示输入框
+    // Show input box when custom is selected
     document.getElementById('dohSelect').addEventListener('change', function () {
       const customContainer = document.getElementById('customDohContainer');
       customContainer.style.display = (this.value === 'custom') ? 'block' : 'none';
 
       if (this.value === 'current') {
-        activeDohUrl = currentDohUrl;
+      activeDohUrl = currentDohUrl;
       } else if (this.value !== 'custom') {
-        activeDohUrl = this.value;
+      activeDohUrl = this.value;
       }
     });
 
-    // 清除按钮功能
+    // Clear button functionality
     document.getElementById('clearBtn').addEventListener('click', function () {
       document.getElementById('domain').value = '';
       document.getElementById('domain').focus();
     });
 
-    // 复制结果功能
+    // Copy results functionality
     document.getElementById('copyBtn').addEventListener('click', function () {
       const resultText = document.getElementById('result').textContent;
       navigator.clipboard.writeText(resultText).then(function () {
-        const originalText = this.textContent;
-        this.textContent = '已复制';
-        setTimeout(() => {
-          this.textContent = originalText;
-        }, 2000);
+      const originalText = this.textContent;
+      this.textContent = 'Copied';
+      setTimeout(() => {
+        this.textContent = originalText;
+      }, 2000);
       }.bind(this)).catch(function (err) {
-        console.error('无法复制文本: ', err);
+      console.error('Unable to copy text: ', err);
       });
     });
 
-    // 格式化 TTL
+    // Format TTL
     function formatTTL(seconds) {
-      if (seconds < 60) return seconds + '秒';
-      if (seconds < 3600) return Math.floor(seconds / 60) + '分钟';
-      if (seconds < 86400) return Math.floor(seconds / 3600) + '小时';
-      return Math.floor(seconds / 86400) + '天';
+      if (seconds < 60) return seconds + ' seconds';
+      if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours';
+      return Math.floor(seconds / 86400) + ' days';
     }
 
-    // 查询 IP 地理位置信息 - 使用我们自己的代理API而非直接访问HTTP地址
+    // Query IP geolocation information - Use our own proxy API instead of direct HTTP access
     async function queryIpGeoInfo(ip) {
       try {
-        // 改为使用我们自己的代理接口
-        const response = await fetch(\`./ip-info?ip=\${ip}\`);
-            if (!response.ok) {
-              throw new Error(\`HTTP 错误: \${response.status}\`);
+      // Use our own proxy interface
+      const response = await fetch(`./ip-info?ip=${ip}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        return await response.json();
+        } catch (error) {
+        console.error('IP geolocation query failed:', error);
+        return null;
+        }
+      }
+      
+      // Display records
+      function displayRecords(data) {
+        document.getElementById('resultContainer').style.display = 'block';
+        document.getElementById('errorContainer').style.display = 'none';
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
+        // IPv4 records
+        const ipv4Records = data.ipv4?.records || [];
+        const ipv4Container = document.getElementById('ipv4Records');
+        ipv4Container.innerHTML = '';
+        
+        if (ipv4Records.length === 0) {
+        document.getElementById('ipv4Summary').innerHTML = `<strong>No IPv4 records found</strong>`;
+        } else {
+        document.getElementById('ipv4Summary').innerHTML = `<strong>Found ${ipv4Records.length} IPv4 records</strong>`;
+        
+        ipv4Records.forEach(record => {
+          if (record.type === 1) {  // 1 = A record
+          const recordDiv = document.createElement('div');
+          recordDiv.className = 'ip-record';
+          recordDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+            <span class="ip-address">${record.data}</span>
+            <span class="geo-info geo-loading">Fetching geolocation...</span>
+            <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
+            </div>
+          `;
+          ipv4Container.appendChild(recordDiv);
+          
+          // Add geolocation information
+          const geoInfoSpan = recordDiv.querySelector('.geo-info');
+          // Asynchronously query IP geolocation information
+          queryIpGeoInfo(record.data).then(geoData => {
+            if (geoData && geoData.status === 'success') {
+            // Update to actual geolocation information
+            geoInfoSpan.innerHTML = '';
+            geoInfoSpan.classList.remove('geo-loading');
+            
+            // Add country information
+            const countrySpan = document.createElement('span');
+            countrySpan.className = 'geo-country';
+            countrySpan.textContent = geoData.country || 'Unknown country';
+            geoInfoSpan.appendChild(countrySpan);
+            
+            // Add AS information
+            const asSpan = document.createElement('span');
+            asSpan.className = 'geo-as';
+            asSpan.textContent = geoData.as || 'Unknown AS';
+            geoInfoSpan.appendChild(asSpan);
+            } else {
+            // Query failed or no result
+            geoInfoSpan.textContent = 'Geolocation fetch failed';
             }
-            return await response.json();
-          } catch (error) {
-            console.error('IP 地理位置查询失败:', error);
-            return null;
+          });
           }
+        });
         }
         
-        // 显示记录
-        function displayRecords(data) {
-          document.getElementById('resultContainer').style.display = 'block';
-          document.getElementById('errorContainer').style.display = 'none';
-          document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        // IPv6 records
+        const ipv6Records = data.ipv6?.records || [];
+        const ipv6Container = document.getElementById('ipv6Records');
+        ipv6Container.innerHTML = '';
+        
+        if (ipv6Records.length === 0) {
+        document.getElementById('ipv6Summary').innerHTML = `<strong>No IPv6 records found</strong>`;
+        } else {
+        document.getElementById('ipv6Summary').innerHTML = `<strong>Found ${ipv6Records.length} IPv6 records</strong>`;
+        
+        ipv6Records.forEach(record => {
+          if (record.type === 28) {  // 28 = AAAA record
+          const recordDiv = document.createElement('div');
+          recordDiv.className = 'ip-record';
+          recordDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+            <span class="ip-address">${record.data}</span>
+            <span class="geo-info geo-loading">Fetching geolocation...</span>
+            <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
+            </div>
+          `;
+          ipv6Container.appendChild(recordDiv);
           
-          // IPv4 记录
-          const ipv4Records = data.ipv4?.records || [];
-          const ipv4Container = document.getElementById('ipv4Records');
-          ipv4Container.innerHTML = '';
-          
-          if (ipv4Records.length === 0) {
-            document.getElementById('ipv4Summary').innerHTML = \`<strong>未找到 IPv4 记录</strong>\`;
-          } else {
-            document.getElementById('ipv4Summary').innerHTML = \`<strong>找到 \${ipv4Records.length} 条 IPv4 记录</strong>\`;
+          // Add geolocation information
+          const geoInfoSpan = recordDiv.querySelector('.geo-info');
+          // Asynchronously query IP geolocation information
+          queryIpGeoInfo(record.data).then(geoData => {
+            if (geoData && geoData.status === 'success') {
+            // Update to actual geolocation information
+            geoInfoSpan.innerHTML = '';
+            geoInfoSpan.classList.remove('geo-loading');
             
-            ipv4Records.forEach(record => {
-              if (record.type === 1) {  // 1 = A记录
-                const recordDiv = document.createElement('div');
-                recordDiv.className = 'ip-record';
-                recordDiv.innerHTML = \`
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">\${record.data}</span>
-                    <span class="geo-info geo-loading">正在获取位置信息...</span>
-                    <span class="text-muted ttl-info">TTL: \${formatTTL(record.TTL)}</span>
-                  </div>
-                \`;
-                ipv4Container.appendChild(recordDiv);
-                
-                // 添加地理位置信息
-                const geoInfoSpan = recordDiv.querySelector('.geo-info');
-                // 异步查询 IP 地理位置信息
-                queryIpGeoInfo(record.data).then(geoData => {
-                  if (geoData && geoData.status === 'success') {
-                    // 更新为实际的地理位置信息
-                    geoInfoSpan.innerHTML = '';
-                    geoInfoSpan.classList.remove('geo-loading');
-                    
-                    // 添加国家信息
-                    const countrySpan = document.createElement('span');
-                    countrySpan.className = 'geo-country';
-                    countrySpan.textContent = geoData.country || '未知国家';
-                    geoInfoSpan.appendChild(countrySpan);
-                    
-                    // 添加 AS 信息
-                    const asSpan = document.createElement('span');
-                    asSpan.className = 'geo-as';
-                    asSpan.textContent = geoData.as || '未知 AS';
-                    geoInfoSpan.appendChild(asSpan);
-                  } else {
-                    // 查询失败或无结果
-                    geoInfoSpan.textContent = '位置信息获取失败';
-                  }
-                });
-              }
-            });
+            // Add country information
+            const countrySpan = document.createElement('span');
+            countrySpan.className = 'geo-country';
+            countrySpan.textContent = geoData.country || 'Unknown country';
+            geoInfoSpan.appendChild(countrySpan);
+            
+            // Add AS information
+            const asSpan = document.createElement('span');
+            asSpan.className = 'geo-as';
+            asSpan.textContent = geoData.as || 'Unknown AS';
+            geoInfoSpan.appendChild(asSpan);
+            } else {
+            // Query failed or no result
+            geoInfoSpan.textContent = 'Geolocation fetch failed';
+            }
+          });
           }
-          
-          // IPv6 记录
-          const ipv6Records = data.ipv6?.records || [];
-          const ipv6Container = document.getElementById('ipv6Records');
-          ipv6Container.innerHTML = '';
-          
-          if (ipv6Records.length === 0) {
-            document.getElementById('ipv6Summary').innerHTML = \`<strong>未找到 IPv6 记录</strong>\`;
-          } else {
-            document.getElementById('ipv6Summary').innerHTML = \`<strong>找到 \${ipv6Records.length} 条 IPv6 记录</strong>\`;
+        });
+        }
+        
+        // NS records
+        const nsRecords = data.ns?.records || [];
+        const nsContainer = document.getElementById('nsRecords');
+        nsContainer.innerHTML = '';
+        
+        if (nsRecords.length === 0) {
+        document.getElementById('nsSummary').innerHTML = `<strong>No NS records found</strong>`;
+        } else {
+        document.getElementById('nsSummary').innerHTML = `<strong>Found ${nsRecords.length} NS records</strong>`;
+        
+        nsRecords.forEach(record => {
+          if (record.type === 2) {  // 2 = NS record
+          const recordDiv = document.createElement('div');
+          recordDiv.className = 'ip-record';
+          recordDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+            <span class="ip-address">${record.data}</span>
+            <span class="text-muted">TTL: ${formatTTL(record.TTL)}</span>
+            </div>
+          `;
+          nsContainer.appendChild(recordDiv);
+          }
+        });
+        }
+        
+        // Ensure geolocation information is displayed when the user switches to IPv4 or IPv6 tabs
+        document.getElementById('ipv4-tab').addEventListener('click', function() {
+        // Handle any loading geolocation information here
+        });
+        
+        document.getElementById('ipv6-tab').addEventListener('click', function() {
+        // Handle any loading geolocation information here
+        });
+        
+        // Show copy button
+        document.getElementById('copyBtn').style.display = 'block';
+      }
+      
+      // Display error
+      function displayError(message) {
+        document.getElementById('resultContainer').style.display = 'none';
+        document.getElementById('errorContainer').style.display = 'block';
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('copyBtn').style.display = 'none';
+      }
+      
+      // Submit form and initiate DNS query request
+      document.getElementById('resolveForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const dohSelect = document.getElementById('dohSelect').value;
+        let doh;
+        
+        if(dohSelect === 'current') {
+        doh = currentDohUrl;
+        } else if(dohSelect === 'custom') {
+        doh = document.getElementById('customDoh').value;
+        if (!doh) {
+          alert('Please enter a custom DoH address');
+          return;
+        }
+        } else {
+        doh = dohSelect;
+        }
+        
+        const domain = document.getElementById('domain').value;
+        if (!domain) {
+        alert('Please enter a domain to resolve');
+        return;
+        }
+        
+        // Show loading state
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('resultContainer').style.display = 'none';
+        document.getElementById('errorContainer').style.display = 'none';
+        document.getElementById('copyBtn').style.display = 'none';
+        
+        try {
+        // Initiate query, parameters use GET request method, type=all means querying both A and AAAA
+        const response = await fetch(`?doh=${encodeURIComponent(doh)}&domain=${encodeURIComponent(domain)}&type=all`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        const json = await response.json();
+        
+        // Check if the response contains an error
+        if (json.error) {
+          displayError(json.error);
+        } else {
+          displayRecords(json);
+        }
+        } catch (error) {
+        displayError('Query failed: ' + error.message);
+        } finally {
+        // Hide loading state
+        document.getElementById('loading').style.display = 'none';
+        }
+      });
+      
+      // Execute after page load
+      document.addEventListener('DOMContentLoaded', function() {
+        // Use local storage to remember the last used domain
+        const lastDomain = localStorage.getItem('lastDomain');
+        if (lastDomain) {
+        document.getElementById('domain').value = lastDomain;
+        }
+        
+        // Listen for domain input changes and save
+        document.getElementById('domain').addEventListener('input', function() {
+        localStorage.setItem('lastDomain', this.value);
+        });
+      });
+
+      // Execute after page load
+      document.addEventListener('DOMContentLoaded', function() {
+      // Use local storage to remember the last used domain
+      const lastDomain = localStorage.getItem('lastDomain');
+      if (lastDomain) {
+        document.getElementById('domain').value = lastDomain;
+      }
+      
+      // Listen for domain input changes and save
+      document.getElementById('domain').addEventListener('input', function() {
+        localStorage.setItem('lastDomain', this.value);
+      });
+
+      // Update display of current domain
+      document.getElementById('currentDomain').textContent = currentHost;
+      
+      // Set DoH link copy functionality
+      const dohUrlDisplay = document.getElementById('dohUrlDisplay');
+      if (dohUrlDisplay) {
+        dohUrlDisplay.addEventListener('click', function() {
+        const textToCopy = currentProtocol + '//' + currentHost + '/dns-query';
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          dohUrlDisplay.classList.add('copied');
+          setTimeout(() => {
+          dohUrlDisplay.classList.remove('copied');
+          }, 2000);
+        }).catch(function(err) {
+          console.error('Copy failed:', err);
+        });
+        });
+      }
+      });
+            // IPv6 records
+            const ipv6Records = data.ipv6?.records || [];
+            const ipv6Container = document.getElementById('ipv6Records');
+            ipv6Container.innerHTML = '';
+            
+            if (ipv6Records.length === 0) {
+            document.getElementById('ipv6Summary').innerHTML = `<strong>No IPv6 records found</strong>`;
+            } else {
+            document.getElementById('ipv6Summary').innerHTML = `<strong>Found ${ipv6Records.length} IPv6 records</strong>`;
             
             ipv6Records.forEach(record => {
-              if (record.type === 28) {  // 28 = AAAA记录
-                const recordDiv = document.createElement('div');
-                recordDiv.className = 'ip-record';
-                recordDiv.innerHTML = \`
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">\${record.data}</span>
-                    <span class="geo-info geo-loading">正在获取位置信息...</span>
-                    <span class="text-muted ttl-info">TTL: \${formatTTL(record.TTL)}</span>
-                  </div>
-                \`;
-                ipv6Container.appendChild(recordDiv);
+              if (record.type === 28) {  // 28 = AAAA record
+              const recordDiv = document.createElement('div');
+              recordDiv.className = 'ip-record';
+              recordDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                <span class="ip-address">${record.data}</span>
+                <span class="geo-info geo-loading">Fetching geolocation...</span>
+                <span class="text-muted ttl-info">TTL: ${formatTTL(record.TTL)}</span>
+                </div>
+              `;
+              ipv6Container.appendChild(recordDiv);
+              
+              // Add geolocation information
+              const geoInfoSpan = recordDiv.querySelector('.geo-info');
+              // Asynchronously query IP geolocation information
+              queryIpGeoInfo(record.data).then(geoData => {
+                if (geoData && geoData.status === 'success') {
+                // Update to actual geolocation information
+                geoInfoSpan.innerHTML = '';
+                geoInfoSpan.classList.remove('geo-loading');
                 
-                // 添加地理位置信息
-                const geoInfoSpan = recordDiv.querySelector('.geo-info');
-                // 异步查询 IP 地理位置信息
-                queryIpGeoInfo(record.data).then(geoData => {
-                  if (geoData && geoData.status === 'success') {
-                    // 更新为实际的地理位置信息
-                    geoInfoSpan.innerHTML = '';
-                    geoInfoSpan.classList.remove('geo-loading');
-                    
-                    // 添加国家信息
-                    const countrySpan = document.createElement('span');
-                    countrySpan.className = 'geo-country';
-                    countrySpan.textContent = geoData.country || '未知国家';
-                    geoInfoSpan.appendChild(countrySpan);
-                    
-                    // 添加 AS 信息
-                    const asSpan = document.createElement('span');
-                    asSpan.className = 'geo-as';
-                    asSpan.textContent = geoData.as || '未知 AS';
-                    geoInfoSpan.appendChild(asSpan);
-                  } else {
-                    // 查询失败或无结果
-                    geoInfoSpan.textContent = '位置信息获取失败';
-                  }
-                });
+                // Add country information
+                const countrySpan = document.createElement('span');
+                countrySpan.className = 'geo-country';
+                countrySpan.textContent = geoData.country || 'Unknown country';
+                geoInfoSpan.appendChild(countrySpan);
+                
+                // Add AS information
+                const asSpan = document.createElement('span');
+                asSpan.className = 'geo-as';
+                asSpan.textContent = geoData.as || 'Unknown AS';
+                geoInfoSpan.appendChild(asSpan);
+                } else {
+                // Query failed or no result
+                geoInfoSpan.textContent = 'Geolocation fetch failed';
+                }
+              });
               }
             });
-          }
-          
-          // NS 记录
-          const nsRecords = data.ns?.records || [];
-          const nsContainer = document.getElementById('nsRecords');
-          nsContainer.innerHTML = '';
-          
-          if (nsRecords.length === 0) {
-            document.getElementById('nsSummary').innerHTML = \`<strong>未找到 NS 记录</strong>\`;
-          } else {
-            document.getElementById('nsSummary').innerHTML = \`<strong>找到 \${nsRecords.length} 条名称服务器记录</strong>\`;
+            }
+            
+            // NS records
+            const nsRecords = data.ns?.records || [];
+            const nsContainer = document.getElementById('nsRecords');
+            nsContainer.innerHTML = '';
+            
+            if (nsRecords.length === 0) {
+            document.getElementById('nsSummary').innerHTML = `<strong>No NS records found</strong>`;
+            } else {
+            document.getElementById('nsSummary').innerHTML = `<strong>Found ${nsRecords.length} NS records</strong>`;
             
             nsRecords.forEach(record => {
-              if (record.type === 2) {  // 2 = NS记录
-                const recordDiv = document.createElement('div');
-                recordDiv.className = 'ip-record';
-                recordDiv.innerHTML = \`
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="ip-address">\${record.data}</span>
-                    <span class="text-muted">TTL: \${formatTTL(record.TTL)}</span>
-                  </div>
-                \`;
-                nsContainer.appendChild(recordDiv);
+              if (record.type === 2) {  // 2 = NS record
+              const recordDiv = document.createElement('div');
+              recordDiv.className = 'ip-record';
+              recordDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                <span class="ip-address">${record.data}</span>
+                <span class="text-muted">TTL: ${formatTTL(record.TTL)}</span>
+                </div>
+              `;
+              nsContainer.appendChild(recordDiv);
               }
             });
+            }
+            
+            // Ensure geolocation information is displayed when the user switches to IPv4 or IPv6 tabs
+            document.getElementById('ipv4-tab').addEventListener('click', function() {
+            // Handle any loading geolocation information here
+            });
+            
+            document.getElementById('ipv6-tab').addEventListener('click', function() {
+            // Handle any loading geolocation information here
+            });
+            
+            // Show copy button
+            document.getElementById('copyBtn').style.display = 'block';
           }
           
-          // 当用户切换到IPv4或IPv6选项卡时，确保显示已加载的地理位置信息
-          document.getElementById('ipv4-tab').addEventListener('click', function() {
-            // 如果还有加载中的地理位置信息，可以在这里处理
-          });
+          // Display error
+          function displayError(message) {
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('copyBtn').style.display = 'none';
+          }
           
-          document.getElementById('ipv6-tab').addEventListener('click', function() {
-            // 如果还有加载中的地理位置信息，可以在这里处理
-          });
-          
-          // 显示复制按钮
-          document.getElementById('copyBtn').style.display = 'block';
-        }
-        
-        // 显示错误
-        function displayError(message) {
-          document.getElementById('resultContainer').style.display = 'none';
-          document.getElementById('errorContainer').style.display = 'block';
-          document.getElementById('errorMessage').textContent = message;
-          document.getElementById('copyBtn').style.display = 'none';
-        }
-        
-        // 表单提交后发起 DNS 查询请求
-        document.getElementById('resolveForm').addEventListener('submit', async function(e) {
-          e.preventDefault();
-          const dohSelect = document.getElementById('dohSelect').value;
-          let doh;
-          
-          if(dohSelect === 'current') {
+          // Submit form and initiate DNS query request
+          document.getElementById('resolveForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const dohSelect = document.getElementById('dohSelect').value;
+            let doh;
+            
+            if(dohSelect === 'current') {
             doh = currentDohUrl;
-          } else if(dohSelect === 'custom') {
+            } else if(dohSelect === 'custom') {
             doh = document.getElementById('customDoh').value;
             if (!doh) {
-              alert('请输入自定义 DoH 地址');
+              alert('Please enter a custom DoH address');
               return;
             }
-          } else {
+            } else {
             doh = dohSelect;
-          }
-          
-          const domain = document.getElementById('domain').value;
-          if (!domain) {
-            alert('请输入需要解析的域名');
+            }
+            
+            const domain = document.getElementById('domain').value;
+            if (!domain) {
+            alert('Please enter a domain to resolve');
             return;
-          }
-          
-          // 显示加载状态
-          document.getElementById('loading').style.display = 'block';
-          document.getElementById('resultContainer').style.display = 'none';
-          document.getElementById('errorContainer').style.display = 'none';
-          document.getElementById('copyBtn').style.display = 'none';
-          
-          try {
-            // 发起查询，参数采用 GET 请求方式，type=all 表示同时查询 A 和 AAAA
-            const response = await fetch(\`?doh=\${encodeURIComponent(doh)}&domain=\${encodeURIComponent(domain)}&type=all\`);
+            }
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'none';
+            document.getElementById('copyBtn').style.display = 'none';
+            
+            try {
+            // Initiate query, parameters use GET request method, type=all means querying both A and AAAA
+            const response = await fetch(`?doh=${encodeURIComponent(doh)}&domain=${encodeURIComponent(domain)}&type=all`);
             
             if (!response.ok) {
-              throw new Error(\`HTTP 错误: \${response.status}\`);
+              throw new Error(`HTTP error: ${response.status}`);
             }
             
             const json = await response.json();
             
-            // 检查响应是否包含错误
+            // Check if the response contains an error
             if (json.error) {
               displayError(json.error);
             } else {
               displayRecords(json);
             }
-          } catch (error) {
-            displayError('查询失败: ' + error.message);
-          } finally {
-            // 隐藏加载状态
+            } catch (error) {
+            displayError('Query failed: ' + error.message);
+            } finally {
+            // Hide loading state
             document.getElementById('loading').style.display = 'none';
-          }
-        });
-        
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-          // 使用本地存储记住最后使用的域名
+            }
+          });
+          
+          // Execute after page load
+          document.addEventListener('DOMContentLoaded', function() {
+            // Use local storage to remember the last used domain
+            const lastDomain = localStorage.getItem('lastDomain');
+            if (lastDomain) {
+            document.getElementById('domain').value = lastDomain;
+            }
+            
+            // Listen for domain input changes and save
+            document.getElementById('domain').addEventListener('input', function() {
+            localStorage.setItem('lastDomain', this.value);
+            });
+          });
+
+          // Execute after page load
+          document.addEventListener('DOMContentLoaded', function() {
+          // Use local storage to remember the last used domain
           const lastDomain = localStorage.getItem('lastDomain');
           if (lastDomain) {
             document.getElementById('domain').value = lastDomain;
           }
           
-          // 监听域名输入变化并保存
+          // Listen for domain input changes and save
           document.getElementById('domain').addEventListener('input', function() {
             localStorage.setItem('lastDomain', this.value);
           });
-        });
 
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-        // 使用本地存储记住最后使用的域名
-        const lastDomain = localStorage.getItem('lastDomain');
-        if (lastDomain) {
-            document.getElementById('domain').value = lastDomain;
-        }
-        
-        // 监听域名输入变化并保存
-        document.getElementById('domain').addEventListener('input', function() {
-            localStorage.setItem('lastDomain', this.value);
-        });
-
-        // 更新显示当前域名
-        document.getElementById('currentDomain').textContent = currentHost;
-        
-        // 设置DoH链接复制功能
-        const dohUrlDisplay = document.getElementById('dohUrlDisplay');
-        if (dohUrlDisplay) {
+          // Update display of current domain
+          document.getElementById('currentDomain').textContent = currentHost;
+          
+          // Set DoH link copy functionality
+          const dohUrlDisplay = document.getElementById('dohUrlDisplay');
+          if (dohUrlDisplay) {
             dohUrlDisplay.addEventListener('click', function() {
             const textToCopy = currentProtocol + '//' + currentHost + '/dns-query';
             navigator.clipboard.writeText(textToCopy).then(function() {
-                dohUrlDisplay.classList.add('copied');
-                setTimeout(() => {
-                dohUrlDisplay.classList.remove('copied');
-                }, 2000);
+              dohUrlDisplay.classList.add('copied');
+              setTimeout(() => {
+              dohUrlDisplay.classList.remove('copied');
+              }, 2000);
             }).catch(function(err) {
-                console.error('复制失败:', err);
+              console.error('Copy failed:', err);
             });
             });
         }
         });
   </script>
 </body>
-
 </html>`;
 
     return new Response(html, {
