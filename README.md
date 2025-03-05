@@ -10,11 +10,11 @@ CF-Workers-DoH 是一个基于 Cloudflare Workers 构建的 DNS over HTTPS (DoH)
 
 ## 📖 使用方法
 
-例如 **Workers项目域名** 为：`doh.090227.xyz`；
+例如 **Workers项目域名** 为：`doh.051214.xyz`；
 
 在支持 DoH 的客户端或应用中，将 DoH 地址设置为：
 ```url
-https://doh.090227.xyz/dns-query
+https://doh.051214.xyz/dns-query
 ```
 
 ## 💡 技术特性
