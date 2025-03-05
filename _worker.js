@@ -888,9 +888,11 @@ async function HTML() {
     </div>
 
     <div class="beian-info">
-      <p><strong>DNS-over-HTTPS：<span id="dohUrlDisplay" class="copy-link" title="点击复制">https://<span
-              id="currentDomain">...</span>/dns-query</span></strong><br>基于 Cloudflare Workers 的 DoH (DNS over HTTPS)
-        解析服务</p>
+      <p>
+      <!-- <strong>DNS-over-HTTPS：<span id="dohUrlDisplay" class="copy-link" title="点击复制">https://<span
+              id="currentDomain">...</span>/dns-query</span></strong><br> -->
+              
+              基于 Cloudflare Workers 的 DoH (DNS over HTTPS) 解析服务</p>
     </div>
   </div>
 
