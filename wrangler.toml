@@ -1,0 +1,3 @@
+name = "tg-api"
+main = "_worker.js"
+compatibility_date = "2025-03-05"
